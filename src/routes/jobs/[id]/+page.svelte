@@ -66,12 +66,23 @@
           <p class="label">Updated</p>
           <p>{new Date(job.updatedAt).toLocaleString()}</p>
         </div>
+        <div>
+          <p class="label">Retries</p>
+          <p>{job.retryCount ?? 0} / {job.maxRetries ?? 3}</p>
+        </div>
       </div>
 
       <div>
         <p class="label">Payload</p>
         <pre>{JSON.stringify(job.payload, null, 2)}</pre>
       </div>
+
+      {#if job.lastError}
+        <div>
+          <p class="label">Last Error</p>
+          <pre>{job.lastError}</pre>
+        </div>
+      {/if}
     </section>
   {/if}
 </main>
@@ -172,6 +183,11 @@
   .status.completed {
     background: #dcfce7;
     color: #166534;
+  }
+
+  .status.failed {
+    background: #fee2e2;
+    color: #991b1b;
   }
 
   .muted {

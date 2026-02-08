@@ -4,7 +4,7 @@ import { getDb } from '$lib/db';
 export async function GET({ params }) {
   const db = getDb();
   const result = await db.query(
-    `select id, type, payload, status, created_at, updated_at
+    `select id, type, payload, status, created_at, updated_at, retry_count, max_retries, last_error
      from jobs
      where id = $1
      limit 1`,
@@ -23,6 +23,9 @@ export async function GET({ params }) {
     status: row.status,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
-    payload: row.payload
+    payload: row.payload,
+    retryCount: row.retry_count,
+    maxRetries: row.max_retries,
+    lastError: row.last_error
   });
 }

@@ -26,7 +26,7 @@ Queue a job:
 ```bash
 curl -X POST http://localhost:5173/api/jobs \\
   -H \"Content-Type: application/json\" \\
-  -d '{\"type\":\"send-email\",\"payload\":{\"to\":\"demo@example.com\"}}'
+  -d '{\"type\":\"send-email\",\"payload\":{\"to\":\"demo@example.com\"},\"maxRetries\":3}'
 ```
 
 List recent jobs:
@@ -34,6 +34,12 @@ List recent jobs:
 ```bash
 curl http://localhost:5173/api/jobs
 ```
+
+## Retries + dead-letter queue
+
+- Set `maxRetries` when enqueuing a job to control retries.
+- Jobs that exceed `maxRetries` are marked `failed` and pushed to `jobs:dead` in Redis.
+- To simulate a failure, enqueue a job with `"type": "fail-job"` or `"payload": { "fail": true }`.
 
 ## Terraform (later)
 

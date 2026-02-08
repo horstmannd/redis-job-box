@@ -15,6 +15,7 @@
   let error = '';
   let type = 'send-email';
   let payloadText = '{\n  "to": "demo@example.com"\n}';
+  let maxRetries = 3;
 
   async function loadJobs() {
     loading = true;
@@ -50,7 +51,7 @@
       const res = await fetch('/api/jobs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type, payload })
+        body: JSON.stringify({ type, payload, maxRetries })
       });
 
       if (!res.ok) {
@@ -106,7 +107,11 @@
       const updated = {
         ...existing,
         status: payload.status || existing.status,
-        updatedAt: payload.updatedAt || existing.updatedAt
+        updatedAt: payload.updatedAt || existing.updatedAt,
+        retryCount:
+          payload.retryCount !== undefined ? payload.retryCount : existing.retryCount,
+        maxRetries: payload.maxRetries !== undefined ? payload.maxRetries : existing.maxRetries,
+        lastError: payload.lastError ?? existing.lastError
       };
       jobs = [...jobs.slice(0, index), updated, ...jobs.slice(index + 1)];
     };
@@ -152,6 +157,11 @@
         <textarea bind:value={payloadText} rows="6" spellcheck="false"></textarea>
       </label>
 
+      <label>
+        <span>Max retries</span>
+        <input type="number" min="0" max="10" bind:value={maxRetries} />
+      </label>
+
       <div class="actions">
         <button class="primary" type="submit" disabled={submitting}>
           {submitting ? 'Enqueuing…' : 'Enqueue job'}
@@ -160,6 +170,15 @@
           <button type="button" on:click={() => (type = 'resize-image')}>Resize image</button>
           <button type="button" on:click={() => (type = 'send-email')}>Send email</button>
           <button type="button" on:click={() => (type = 'sync-crm')}>Sync CRM</button>
+          <button
+            type="button"
+            on:click={() => {
+              type = 'fail-job';
+              payloadText = '{\n  \"fail\": true\n}';
+            }}
+          >
+            Simulate failure
+          </button>
         </div>
       </div>
     </form>
@@ -188,6 +207,7 @@
             <div class="job-meta">
               <span class={`status ${job.status}`}>{job.status}</span>
               <p class="job-time">{new Date(job.createdAt).toLocaleString()}</p>
+              <p class="job-retries">Retries: {job.retryCount ?? 0}/{job.maxRetries ?? 3}</p>
             </div>
           </a>
         {/each}
@@ -404,10 +424,21 @@
     color: #166534;
   }
 
+  .status.failed {
+    background: #fee2e2;
+    color: #991b1b;
+  }
+
   .job-time {
     margin: 0.35rem 0 0;
     color: #64748b;
     font-size: 0.85rem;
+  }
+
+  .job-retries {
+    margin: 0.2rem 0 0;
+    color: #94a3b8;
+    font-size: 0.75rem;
   }
 
   .muted {
