@@ -180,7 +180,7 @@
     {:else}
       <div class="jobs">
         {#each jobs as job}
-          <article class="job">
+          <a class="job" href={`/jobs/${job.id}`}>
             <div>
               <p class="job-type">{job.type}</p>
               <p class="job-id">{job.id}</p>
@@ -189,7 +189,7 @@
               <span class={`status ${job.status}`}>{job.status}</span>
               <p class="job-time">{new Date(job.createdAt).toLocaleString()}</p>
             </div>
-          </article>
+          </a>
         {/each}
       </div>
     {/if}
@@ -354,6 +354,14 @@
     border-radius: 12px;
     border: 1px solid #e2e8f0;
     background: #f8fafc;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .job:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
   }
 
   .job-type {
