@@ -1,0 +1,20 @@
+{
+  "name": "redis-job-box",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite dev",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@sveltejs/adapter-vercel": "^5.4.4",
+    "@sveltejs/kit": "^2.6.4",
+    "svelte": "^5.2.1"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^4.0.4",
+    "vite": "^5.4.8"
+  }
+}
