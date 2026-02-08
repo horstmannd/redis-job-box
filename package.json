@@ -7,11 +7,13 @@
     "dev": "vite dev",
     "build": "vite build",
     "preview": "vite preview",
-    "worker": "node scripts/worker.js"
+    "worker": "node scripts/worker.js",
+    "migrate": "node scripts/migrate.js"
   },
   "dependencies": {
     "@sveltejs/adapter-vercel": "^5.4.4",
     "@sveltejs/kit": "^2.6.4",
+    "pg": "^8.11.5",
     "redis": "^4.7.0",
     "svelte": "^5.2.1"
   },

@@ -1,6 +1,7 @@
 import { json } from '@sveltejs/kit';
 import { randomUUID } from 'node:crypto';
 import { getRedis } from '$lib/redis';
+import { getDb } from '$lib/db';
 
 const QUEUE_KEY = 'jobs:queue';
 const RECENT_KEY = 'jobs:recent';
@@ -29,6 +30,14 @@ export async function POST({ request }) {
   };
 
   const redis = await getRedis();
+  const db = getDb();
+
+  await db.query(
+    `insert into jobs (id, type, payload, status, created_at, updated_at)
+     values ($1, $2, $3, $4, $5, $6)`,
+    [id, type, payload ?? null, 'queued', now, now]
+  );
+
   await redis.hSet(`job:${id}`, job);
   await redis.rPush(QUEUE_KEY, id);
   await redis.lPush(RECENT_KEY, id);
@@ -38,42 +47,26 @@ export async function POST({ request }) {
 }
 
 export async function GET() {
-  const redis = await getRedis();
-  const ids = await redis.lRange(RECENT_KEY, 0, 19);
+  const db = getDb();
+  const result = await db.query(
+    `select id, type, payload, status, created_at, updated_at
+     from jobs
+     order by created_at desc
+     limit 20`
+  );
 
-  if (ids.length === 0) {
+  if (result.rowCount === 0) {
     return json({ jobs: [] });
   }
 
-  const pipeline = redis.multi();
-  ids.forEach((id) => pipeline.hGetAll(`job:${id}`));
-  const results = (await pipeline.exec()) || [];
-
-  const jobs = results
-    .map((entry, index) => {
-      const data = entry || {};
-      if (!data.id) {
-        return { id: ids[index], status: 'unknown' };
-      }
-
-      return {
-        id: data.id,
-        type: data.type,
-        status: data.status,
-        createdAt: data.createdAt,
-        updatedAt: data.updatedAt,
-        payload: safeJson(data.payload)
-      };
-    })
-    .filter(Boolean);
+  const jobs = result.rows.map((row) => ({
+    id: row.id,
+    type: row.type,
+    status: row.status,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+    payload: row.payload
+  }));
 
   return json({ jobs });
-}
-
-function safeJson(value) {
-  try {
-    return value ? JSON.parse(value) : null;
-  } catch {
-    return null;
-  }
 }

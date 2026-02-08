@@ -1,28 +1,28 @@
 import { json } from '@sveltejs/kit';
-import { getRedis } from '$lib/redis';
+import { getDb } from '$lib/db';
 
 export async function GET({ params }) {
-  const redis = await getRedis();
-  const data = await redis.hGetAll(`job:${params.id}`);
+  const db = getDb();
+  const result = await db.query(
+    `select id, type, payload, status, created_at, updated_at
+     from jobs
+     where id = $1
+     limit 1`,
+    [params.id]
+  );
 
-  if (!data.id) {
+  if (result.rowCount === 0) {
     return json({ error: 'not_found' }, { status: 404 });
   }
 
-  return json({
-    id: data.id,
-    type: data.type,
-    status: data.status,
-    createdAt: data.createdAt,
-    updatedAt: data.updatedAt,
-    payload: safeJson(data.payload)
-  });
-}
+  const row = result.rows[0];
 
-function safeJson(value) {
-  try {
-    return value ? JSON.parse(value) : null;
-  } catch {
-    return null;
-  }
+  return json({
+    id: row.id,
+    type: row.type,
+    status: row.status,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+    payload: row.payload
+  });
 }

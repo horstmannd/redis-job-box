@@ -7,10 +7,17 @@ A small SvelteKit app for learning Redis-backed job queues, live updates, and du
 1. `npm install`
 2. `npm run dev -- --open`
 3. In another terminal: `npm run worker`
+4. Run migrations: `npm run migrate`
 
 ## Docker
 
 `docker compose up --build`
+
+Run migrations (once the database is up):
+
+```bash
+docker compose run --rm app npm run migrate
+```
 
 ## API quickstart
 
