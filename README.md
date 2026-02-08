@@ -6,10 +6,27 @@ A small SvelteKit app for learning Redis-backed job queues, live updates, and du
 
 1. `npm install`
 2. `npm run dev -- --open`
+3. In another terminal: `npm run worker`
 
 ## Docker
 
 `docker compose up --build`
+
+## API quickstart
+
+Queue a job:
+
+```bash
+curl -X POST http://localhost:5173/api/jobs \\
+  -H \"Content-Type: application/json\" \\
+  -d '{\"type\":\"send-email\",\"payload\":{\"to\":\"demo@example.com\"}}'
+```
+
+List recent jobs:
+
+```bash
+curl http://localhost:5173/api/jobs
+```
 
 ## Terraform (later)
 

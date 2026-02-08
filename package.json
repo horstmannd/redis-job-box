@@ -6,11 +6,13 @@
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "worker": "node scripts/worker.js"
   },
   "dependencies": {
     "@sveltejs/adapter-vercel": "^5.4.4",
     "@sveltejs/kit": "^2.6.4",
+    "redis": "^4.7.0",
     "svelte": "^5.2.1"
   },
   "devDependencies": {

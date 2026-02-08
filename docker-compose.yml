@@ -12,6 +12,17 @@ services:
     volumes:
       - .:/app
 
+  worker:
+    build: .
+    command: ["npm", "run", "worker"]
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@db:5432/jobbox
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - redis
+    volumes:
+      - .:/app
+
   db:
     image: postgres:16
     environment:
