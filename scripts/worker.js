@@ -36,19 +36,37 @@ while (running) {
     now,
     id
   ]);
+  await client.publish(
+    'jobs:events',
+    JSON.stringify({
+      id,
+      status: 'running',
+      updatedAt: now
+    })
+  );
 
   // Simulate work
   await sleep(1500);
 
+  const completedAt = new Date().toISOString();
+
   await client.hSet(`job:${id}`, {
     status: 'completed',
-    updatedAt: new Date().toISOString()
+    updatedAt: completedAt
   });
   await db.query('update jobs set status = $1, updated_at = $2 where id = $3', [
     'completed',
-    new Date().toISOString(),
+    completedAt,
     id
   ]);
+  await client.publish(
+    'jobs:events',
+    JSON.stringify({
+      id,
+      status: 'completed',
+      updatedAt: completedAt
+    })
+  );
 
   console.log(`Job ${id} completed`);
 }

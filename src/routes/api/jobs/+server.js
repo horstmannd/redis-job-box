@@ -42,6 +42,15 @@ export async function POST({ request }) {
   await redis.rPush(QUEUE_KEY, id);
   await redis.lPush(RECENT_KEY, id);
   await redis.lTrim(RECENT_KEY, 0, 49);
+  await redis.publish(
+    'jobs:events',
+    JSON.stringify({
+      id,
+      type,
+      status: 'queued',
+      createdAt: now
+    })
+  );
 
   return json({ id, status: job.status });
 }
